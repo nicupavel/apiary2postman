@@ -87,6 +87,10 @@ def main():
     parser.add_argument('--output', metavar='output', type=argparse.FileType('w'), nargs=1, default=stdout,
                         help='output file. Outputs Postman collection JSON. If not supplied, stdout is used.')
 
+    parser.add_argument('--no-names', dest='no_names', action='store_true', default=False,
+                        help='use request url instead of request/resource names')
+
+
     args = parser.parse_args()
 
     input = ''
@@ -118,7 +122,7 @@ def main():
     if args.output != stdout:
         output = output[0]
 
-    write(input, output, args.only_collection, args.pretty, args.single_collection)
+    write(input, output, args.only_collection, args.pretty, args.single_collection, args.no_names)
 
 if  __name__ =='__main__':
     main()

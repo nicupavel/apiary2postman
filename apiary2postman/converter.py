@@ -3,7 +3,7 @@ from sys import stdout
 from uuid import uuid4
 from time import time
 
-def _buildCollectionResponse(apiary, single_collection):
+def _buildCollectionResponse(apiary, single_collection, no_names):
 	environment = createEnvironment(apiary)
 
 	# Create the collection
@@ -11,7 +11,7 @@ def _buildCollectionResponse(apiary, single_collection):
 		apiary,
 		environment['values'], 
 		True,
-		single_collection)
+		single_collection, no_names)
 
 	result = {
 		'id' : str(uuid4()),
@@ -32,7 +32,7 @@ def _buildCollectionResponse(apiary, single_collection):
 
 	return result
 
-def _buildFullResponse(apiary, single_collection):
+def _buildFullResponse(apiary, single_collection, no_names):
 	# Create the Environment
 	environment = createEnvironment(apiary)
 
@@ -49,7 +49,7 @@ def _buildFullResponse(apiary, single_collection):
 		apiary, 
 		result['environments'][0]['values'], 
 		False,
-		single_collection)
+		single_collection, no_names)
 
 	return result
 
@@ -76,13 +76,13 @@ def _createFolder(name, description, collection):
 	folder['collection_name'] = collection['name']	
 	return folder
 
-def write(json_data, out=stdout, only_collection=False, pretty=False, single_collection=False):
+def write(json_data, out=stdout, only_collection=False, pretty=False, single_collection=False, no_names=False):
 	json_obj = json.loads(json_data)
 
 	if only_collection:
-		result_out = _buildCollectionResponse(json_obj, single_collection)
+		result_out = _buildCollectionResponse(json_obj, single_collection, no_names)
 	else:
-		result_out = _buildFullResponse(json_obj, single_collection)
+		result_out = _buildFullResponse(json_obj, single_collection, no_names)
 
 	if pretty:
 		json.dump(result_out, out, indent=2, separators=(',', ': '))
@@ -113,7 +113,7 @@ def createEnvironment(json_obj):
 
 	return environment
 
-def parseResourceGroups(apiary, environment_vals, only_collection, single_collection):
+def parseResourceGroups(apiary, environment_vals, only_collection, single_collection, no_names):
 	out = []
 
 	if single_collection:		
@@ -150,7 +150,10 @@ def parseResourceGroups(apiary, environment_vals, only_collection, single_collec
 				request['name'] = action['name']
 				if single_collection is True:
 					# Add resource as prefix
-					request['name'] = resource['name'] + ": " + request['name']
+					if no_names is True:
+						request['name'] = sub_url
+					else:
+						request['name'] = resource['name'] + ": " + request['name']
 				request['description'] = action['description']
 				request['descriptionFormat'] = 'html'
 				request['method'] = action['method']
