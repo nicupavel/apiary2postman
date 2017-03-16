@@ -90,6 +90,9 @@ def main():
     parser.add_argument('--no-names', dest='no_names', action='store_true', default=False,
                         help='use request url instead of request/resource names')
 
+    parser.add_argument('--url-suffix', dest='url_suffix', default=None,
+                        help='append suffix at the end of all urls')
+
 
     args = parser.parse_args()
 
@@ -122,7 +125,7 @@ def main():
     if args.output != stdout:
         output = output[0]
 
-    write(input, output, args.only_collection, args.pretty, args.single_collection, args.no_names)
+    write(input, output, args.only_collection, args.pretty, args.single_collection, args.no_names, args.url_suffix)
 
 if  __name__ =='__main__':
     main()

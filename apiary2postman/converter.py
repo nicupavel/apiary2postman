@@ -3,7 +3,7 @@ from sys import stdout
 from uuid import uuid4
 from time import time
 
-def _buildCollectionResponse(apiary, single_collection, no_names):
+def _buildCollectionResponse(apiary, single_collection, no_names, url_suffix):
 	environment = createEnvironment(apiary)
 
 	# Create the collection
@@ -11,7 +11,7 @@ def _buildCollectionResponse(apiary, single_collection, no_names):
 		apiary,
 		environment['values'], 
 		True,
-		single_collection, no_names)
+		single_collection, no_names, url_suffix)
 
 	result = {
 		'id' : str(uuid4()),
@@ -32,7 +32,7 @@ def _buildCollectionResponse(apiary, single_collection, no_names):
 
 	return result
 
-def _buildFullResponse(apiary, single_collection, no_names):
+def _buildFullResponse(apiary, single_collection, no_names, url_suffix):
 	# Create the Environment
 	environment = createEnvironment(apiary)
 
@@ -49,7 +49,7 @@ def _buildFullResponse(apiary, single_collection, no_names):
 		apiary, 
 		result['environments'][0]['values'], 
 		False,
-		single_collection, no_names)
+		single_collection, no_names, url_suffix)
 
 	return result
 
@@ -76,13 +76,13 @@ def _createFolder(name, description, collection):
 	folder['collection_name'] = collection['name']	
 	return folder
 
-def write(json_data, out=stdout, only_collection=False, pretty=False, single_collection=False, no_names=False):
+def write(json_data, out=stdout, only_collection=False, pretty=False, single_collection=False, no_names=False, url_suffix = None):
 	json_obj = json.loads(json_data)
 
 	if only_collection:
-		result_out = _buildCollectionResponse(json_obj, single_collection, no_names)
+		result_out = _buildCollectionResponse(json_obj, single_collection, no_names, url_suffix)
 	else:
-		result_out = _buildFullResponse(json_obj, single_collection, no_names)
+		result_out = _buildFullResponse(json_obj, single_collection, no_names, url_suffix)
 
 	if pretty:
 		json.dump(result_out, out, indent=2, separators=(',', ': '))
@@ -113,7 +113,7 @@ def createEnvironment(json_obj):
 
 	return environment
 
-def parseResourceGroups(apiary, environment_vals, only_collection, single_collection, no_names):
+def parseResourceGroups(apiary, environment_vals, only_collection, single_collection, no_names, url_suffix):
 	out = []
 
 	if single_collection:		
@@ -159,6 +159,9 @@ def parseResourceGroups(apiary, environment_vals, only_collection, single_collec
 				request['method'] = action['method']
 
 				request['url'] = "{{HOST}}"+sub_url
+				if url_suffix is not None:
+					request['url'] += url_suffix
+
 				if only_collection:
 					for value in environment_vals:
 						if value['name'] == 'HOST':
